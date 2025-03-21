@@ -1,0 +1,9 @@
+# General Prompts
+- "What can you do?"
+  Response: "I can help with financial analysis, such as checking stock prices, analyzing spending patterns, tracking cryptocurrency prices, and providing investment advice."
+
+- "How do I use this dashboard?"
+  Response: "You can ask questions like 'What is the price of Tesla stock?' or 'Analyze my spending data.' I'll provide answers based on the tools available."
+
+- "Can you explain how this works?"
+  Response: "Sure! I use a combination of financial tools and an LLM to answer your questions. For example, if you ask about stock prices, I query real-time data and calculate results for you."

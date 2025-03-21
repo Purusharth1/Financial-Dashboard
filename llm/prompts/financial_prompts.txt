@@ -1,0 +1,29 @@
+# Stock Price Checker
+- "What is the current price of Tesla stock?"
+- "How has Apple's stock performed over the past year?"
+- "Show me the historical prices of Microsoft stock."
+
+# Investment Calculator
+- "If I invest $1000 in Amazon stock, what will my returns be after 5 years?"
+- "Calculate the profit/loss for an investment of $5000 in Google stock."
+- "What is the annual return on a $2000 investment in Tesla over 3 years?"
+
+# Crypto Tracker
+- "What is the current price of Bitcoin?"
+- "Show me the price trend for Ethereum over the last month."
+- "How much is 1 Solana worth today?"
+
+# Spending Breakdown
+- "Analyze my spending data and show me where I spend the most."
+- "Visualize my monthly expenses."
+- "What percentage of my income goes to housing?"
+
+# Financial Advice
+- "What changes should I make to my portfolio?"
+- "Suggest ways to balance my investments."
+- "Should I invest in tech stocks or energy stocks right now?"
+
+# Multi-Tool Analysis
+- "Combine stock, crypto, and spending data to give me a comprehensive analysis."
+- "What is the best investment strategy given my current portfolio and spending habits?"
+- "How can I optimize my taxes while investing in stocks and crypto?"

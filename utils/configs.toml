@@ -1,0 +1,16 @@
+# LLM Configuration
+[llm]
+model_name = "llama3.2:3b"
+default_model = "llama3.2:3b"
+ollama_server_url = "http://localhost:11434"  # Default Ollama server URL
+
+
+# Logging configuration
+[logging]
+min_log_level = "INFO"  # Default log level for production
+log_server_port = 9999  # Port for the logging server
+client_log_format = "{time:YYYY-MM-DD HH:mm:ss} | {tool_name} | {file}: {line} | {message}"
+server_log_format = "[{level}] | {message}"
+log_rotation = "00:00"  # Rotate logs at midnight
+log_file_name = "logs/logs.txt"  # Path to the log file
+log_compression = "zip"  # Compress rotated logs
