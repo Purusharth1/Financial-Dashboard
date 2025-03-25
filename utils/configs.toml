@@ -9,8 +9,8 @@ ollama_server_url = "http://localhost:11434"  # Default Ollama server URL
 [logging]
 min_log_level = "INFO"  # Default log level for production
 log_server_port = 9999  # Port for the logging server
-client_log_format = "{time:YYYY-MM-DD HH:mm:ss} | {tool_name} | {file}: {line} | {message}"
+client_log_format = "{time:YYYY-MM-DD HH:mm:ss} | {file}: {line} | {message}"
 server_log_format = "[{level}] | {message}"
 log_rotation = "00:00"  # Rotate logs at midnight
-log_file_name = "logs/logs.txt"  # Path to the log file
+log_file_name = "utils/logs/logs.txt"  # Path to the log file
 log_compression = "zip"  # Compress rotated logs

@@ -8,12 +8,12 @@ from pathlib import Path
 
 from loguru import logger
 
-from unified_logging.config_types import LoggingConfigs
-from unified_logging.logging_client import setup_network_logger_client
+from utils.config_types import LoggingConfigs
+from utils.logging_client import setup_network_logger_client
 
 # Define project root relative to this file (unified_logging/)
 PROJECT_ROOT = Path(__file__).parent.parent
-DEFAULT_CONFIG_PATH = PROJECT_ROOT / "unified_logging" / "configs.toml"
+DEFAULT_CONFIG_PATH = PROJECT_ROOT / "utils" / "configs.toml"
 
 def setup_logging(config_path: str = str(DEFAULT_CONFIG_PATH)) -> LoggingConfigs:
     """Set up unified network logging with a specified config file.

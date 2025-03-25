@@ -3,13 +3,20 @@
 This module implements a logging server that receives log messages over the network
 and logs them to a file.
 """
+import sys
+from pathlib import Path
 
 import zmq
+
+sys.path.append(str(Path(__file__).parent.parent))
 from loguru import logger
 
-from unified_logging.config_types import LoggingConfigs
-from unified_logging.logging_setup import setup_logging
+from utils.config_types import LoggingConfigs
+from utils.logging_setup import setup_logging
 
+# Define project root
+PROJECT_ROOT = Path(__file__).parent.parent  # financial_dashboard/
+DEFAULT_CONFIG_PATH = PROJECT_ROOT / "utils" / "configs.toml"
 
 def set_logging_configs(logging_configs: LoggingConfigs) -> None:
     """Configure the logger with the provided logging settings.
@@ -54,6 +61,6 @@ def start_logging_server(logging_configs: LoggingConfigs) -> None:
 
 
 if __name__ == "__main__":
-    logging_configs = setup_logging()
+    logging_configs = setup_logging(str(DEFAULT_CONFIG_PATH))
     set_logging_configs(logging_configs)
     start_logging_server(logging_configs)

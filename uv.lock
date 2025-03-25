@@ -122,6 +122,7 @@ dependencies = [
     { name = "langchain" },
     { name = "loguru" },
     { name = "ollama" },
+    { name = "pydantic" },
     { name = "pyzmq" },
     { name = "ruff" },
 ]
@@ -131,6 +132,7 @@ requires-dist = [
     { name = "langchain", specifier = ">=0.3.21" },
     { name = "loguru", specifier = ">=0.7.3" },
     { name = "ollama", specifier = ">=0.4.7" },
+    { name = "pydantic", specifier = ">=2.10.6" },
     { name = "pyzmq", specifier = ">=26.3.0" },
     { name = "ruff", specifier = ">=0.11.2" },
 ]

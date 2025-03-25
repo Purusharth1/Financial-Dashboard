@@ -12,8 +12,9 @@ import zmq
 from zmq.log.handlers import PUBHandler
 
 if TYPE_CHECKING:
-    from config_types import LoggingConfigs
     from loguru import Logger
+
+    from utils.config_types import LoggingConfigs
 
 
 def setup_network_logger_client(

@@ -10,19 +10,24 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict
 
+# Define project root relative to this file (utils/logging/)
+PROJECT_ROOT = Path(__file__).parent.parent  # financial_dashboard/
 
-def load_toml(file_name: Path) -> dict:
+def load_toml(file_name: Path, section: str | None = None) -> dict:
     """Load TOML configuration from a file.
 
     Args:
         file_name (Path): The path to the TOML file.
+        section (str | None): Optional section to extract from the TOML file.
+            If None, the entire configuration is returned. Defaults to None.
 
     Returns:
         dict: The loaded configuration dictionary.
 
     """
     with file_name.open("rb") as file_obj:
-        return tomllib.load(file_obj)
+        config = tomllib.load(file_obj)
+        return config.get(section, config) if section else config
 
 
 class LoggingConfigs(BaseModel):
@@ -47,7 +52,7 @@ class LoggingConfigs(BaseModel):
     server_log_format: str = "[{level}] | {message}"
     client_log_format: str = "{time:YYYY-MM-DD HH:mm:ss} | {file}: {line} | {message}"
     log_rotation: str = "00:00"
-    log_file_name: str = "logs/logs.txt"
+    log_file_name: str = str(PROJECT_ROOT / "utils" / "logs" / "logs.txt")
     log_compression: str = "zip"
 
     @staticmethod
@@ -61,7 +66,6 @@ class LoggingConfigs(BaseModel):
             LoggingConfigs: The loaded logging configuration.
 
         """
-        configs: LoggingConfigs = LoggingConfigs.model_validate(
-            load_toml(Path(file_path)),
+        return LoggingConfigs.model_validate(
+            load_toml(Path(file_path), section="logging"),
         )
-        return configs
