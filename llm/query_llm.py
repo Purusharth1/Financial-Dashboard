@@ -1,99 +1,99 @@
-"""Module for querying the LLM.
-
-This module provides a function to send prompts to an LLM and retrieve responses.
-It includes error handling for common issues like connection errors or
-invalid responses.
-"""
+"""Financial Dashboard Agent with LangChain."""
 
 import sys
-import tomllib
 from pathlib import Path
 
-import ollama
+from langchain.agents import AgentExecutor, create_tool_calling_agent
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_ollama import ChatOllama
 from loguru import logger
 
+# Add project root to sys.path for module imports
 sys.path.append(str(Path(__file__).parent.parent))
-from utils.logging_setup import setup_logging  # Adjusted import path
+from tools.crypto_tools import get_crypto_data
+from tools.emergency_fund_tools import calculate_emergency_fund
+from tools.investment_tools import calculate_investment_return
+from tools.spending_tools import get_spending_breakdown
+from tools.stock_tools import get_stock_prices
+from utils.configs import load_config
+from utils.logging_setup import setup_logging
 
-# Define project root relative to this file (llm/)
-PROJECT_ROOT = Path(__file__).parent.parent  # financial_dashboard/
+# Constants
+PROJECT_ROOT = Path(__file__).parent.parent
 DEFAULT_CONFIG_PATH = PROJECT_ROOT / "utils" / "configs.toml"
 
-# Set up logging at module level
+# Set up logging
 logging_configs = setup_logging(str(DEFAULT_CONFIG_PATH))
-logger.info("Logging initialized for query_llm.py")
+logger.info("Logging initialized for financial_agent.py")
+
+# Load LLM configuration
+config = load_config()
+MODEL_NAME = config["llm"]["default_model"]
+
+# Define tools
+TOOLS = [
+    get_spending_breakdown,
+    get_stock_prices,
+    calculate_investment_return,
+    get_crypto_data,
+    calculate_emergency_fund,
+]
+
+# System prompt
+SYSTEM_PROMPT = """
+You are a financial assistant with access to specialized tools to analyze financial data and provide insights.
+Use the tools available to answer user queries accurately. If a query doesn't require a tool, respond directly.
+Provide concise, helpful answers based on the data or calculations from the tools.
+"""
 
 
-def load_config(config_file: str = str(DEFAULT_CONFIG_PATH)) -> dict:
-    """Load configuration settings from a TOML file.
+def create_financial_agent() -> AgentExecutor:
+    """Create a LangChain agent with tool-calling capabilities."""
+    # Initialize LLM
+    llm = ChatOllama(model=MODEL_NAME, temperature=0)
 
-    Args:
-        config_file (str): Path to the TOML configuration file.
+    # Define prompt
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            ("system", SYSTEM_PROMPT),
+            ("human", "{input}"),
+            ("assistant", "{agent_scratchpad}"),
+        ],
+    )
 
-    Returns:
-        dict: Configuration settings.
+    # Create agent
+    agent = create_tool_calling_agent(llm, TOOLS, prompt)
+    executor = AgentExecutor(agent=agent, tools=TOOLS, verbose=True)
 
-    Raises:
-        FileNotFoundError: If the configuration file is not found.
-        ValueError: If the TOML format is invalid.
+    logger.info("Financial agent initialized")
+    return executor
 
-    """
+
+def query_financial_agent(prompt: str) -> str:
+    """Query the financial agent and return the response."""
+    executor = create_financial_agent()
     try:
-        config_path = Path(config_file)  # No need to resolve relative to __file__
-        with config_path.open("rb") as f:
-            logger.debug(f"Loading config from {config_path}")
-            return tomllib.load(f)
-    except FileNotFoundError as fnf_err:
-        error_message = f"Configuration file not found: {config_path}"
-        logger.error(error_message)
-        raise FileNotFoundError(error_message) from fnf_err
-    except tomllib.TOMLDecodeError as decode_err:
-        error_message = f"Invalid TOML format in file: {config_path}"
-        logger.error(error_message)
-        raise ValueError(error_message) from decode_err
-
-
-def query_llm(prompt: str, model: str | None = None) -> str:
-    """Send a query to the LLM and return the response.
-
-    Args:
-        prompt (str): The user's query or prompt.
-        model (str | None): The LLM model to use. Defaults to the value in the config.
-
-    Returns:
-        str: The LLM's response or an error message if something goes wrong.
-
-    Raises:
-        RuntimeError: If there is an issue generating the response.
-
-    """
-    # Load configuration
-    config = load_config()
-    model = model or config["llm"]["default_model"]
-
-    logger.info(f"Sending query to LLM: {prompt} (model: {model})")
-    try:
-        response = ollama.generate(model=model, prompt=prompt)
-    except ollama.ResponseError as e:
-        error_message = f"LLM Response Error: {e!s}"
+        logger.info(f"Processing query: {prompt}")
+        response = executor.invoke({"input": prompt})
+        result = response["output"]
+        logger.info(f"Agent response: {result}")
+        return result
+    except Exception as e:
+        error_message = f"Error processing query: {e}"
         logger.error(error_message)
         return error_message
-    except ConnectionError as conn_err:
-        error_message = f"""Connection Error: Unable to
-                            connect to Ollama server. Details: {conn_err!s}"""
-        logger.error(error_message)
-        return error_message
-    except Exception as unexpected_err:
-        logger.exception(f"Unexpected Error: {unexpected_err!s}")
-        raise
-    else:
-        response_text = response["response"].strip() #Strip whitespace forcleaner output
-        logger.info(f"Received response: {response_text}")
-        return response_text
 
 
-# Example usage
 if __name__ == "__main__":
-    prompt = "Who is the Chief Minister of Rajasthan?"
-    response = query_llm(prompt)
-    logger.info(f"Main execution response: {response}")
+    # Example queries
+    queries = [
+        # "What is the current price of Tesla stock from 2023-01-01 to 2023-12-31?",
+        # "How much emergency fund do I need if my monthly expenses are $2000?",
+        # "Analyze my portfolio: {'AAPL': 0.5, 'TSLA': 0.5}",
+        # "What’s my spending breakdown for 2023?",
+        # "Analyze my spending breakdown for 2023 and show me where I spend the most?",
+        "How much Solana price increase from 2023-01-01 to 2023-12-31?",
+    ]
+    for q in queries:
+        response = query_financial_agent(q)
+        print(f"Query: {q}\nResponse: {response}\n")
