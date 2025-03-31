@@ -11,9 +11,12 @@ dependencies = [
     "ollama>=0.4.7",
     "pandas>=2.2.3",
     "plaid-python>=29.1.0",
+    "plotly>=6.0.1",
     "pydantic>=2.10.6",
     "pyzmq>=26.3.0",
     "ruff>=0.11.2",
+    "streamlit>=1.44.0",
+    "yfinance>=0.2.55",
 ]
 
 [tool.ruff]

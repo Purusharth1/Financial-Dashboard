@@ -15,5 +15,3 @@ log_rotation = "00:00"  # Rotate logs at midnight
 log_file_name = "utils/logs/logs.txt"  # Path to the log file
 log_compression = "zip"  # Compress rotated logs
 
-[api]
-bea_api_key = ""  # Replace with your key
