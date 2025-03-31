@@ -1,11 +1,11 @@
 """FinanceGPT - A Streamlit-based AI Financial Assistant Dashboard."""
-import plotly.graph_objects as go
+import requests
 import streamlit as st
 
 # Set page configuration
 st.set_page_config(
     page_title="FinanceGPT",
-    page_icon="ð � � � ",
+    page_icon="ð � � °",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -109,22 +109,6 @@ st.markdown("""
         text-align: center;
         width: 100%;
     }
-    .tools-indicator {
-        background-color: #e5e7eb;
-        border-radius: 15px;
-        padding: 5px 15px;
-        color: #374151;
-        font-size: 12px;
-        float: right;
-    }
-    .green-dot {
-        height: 8px;
-        width: 8px;
-        background-color: #10b981;
-        border-radius: 50%;
-        display: inline-block;
-        margin-right: 5px;
-    }
     .header-container {
         padding: 20px;
         display: flex;
@@ -142,6 +126,20 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# API Configuration
+if "api_type" not in st.session_state:
+    st.session_state.api_type = "FastAPI"
+
+# API URLs - Updated to ensure they are correct
+FASTAPI_URL = "http://localhost:8000/query"  # Changed from 127.0.0.1 to localhost
+BENTOML_URL = "http://localhost:3000/query"  # Changed from 127.0.0.1 to localhost
+
+SUCCESS_STATUS_CODE = 200  # Define a constant for the magic number 200
+
+def get_api_url() -> str:
+    """Get the current API URL based on the selected API type."""
+    return FASTAPI_URL if st.session_state.api_type == "FastAPI" else BENTOML_URL
+
 # Session state initialization
 if "messages" not in st.session_state:
     st.session_state.messages = [
@@ -150,81 +148,44 @@ if "messages" not in st.session_state:
             "*Try asking about stocks, spending analysis, or investment advice.*"
         )},
     ]
-if "portfolio_value" not in st.session_state:
-    st.session_state.portfolio_value = 124567
-    st.session_state.portfolio_growth = 8.2
-    st.session_state.portfolio_history = [
-        110000, 112000, 118000,
-        116000, 121000, 123000, 124567,
-    ]
-    st.session_state.months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"]
-    st.session_state.asset_allocation = {
-        "Stocks": 45, "Bonds": 25,
-        "Real Estate": 20, "Crypto": 10,
-    }
 
-# Chart functions
-def create_portfolio_chart() -> go.Figure:
-    """Create a portfolio chart."""
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=st.session_state.months,
-        y=st.session_state.portfolio_history,
-        mode="lines+markers",
-        line={"color": "#1a56db", "width": 2},
-        fill="tozeroy",
-        fillcolor="rgba(219, 234, 254, 0.5)",
-    ))
-    fig.update_layout(
-        title=(
-            f"Portfolio Value: ${st.session_state.portfolio_value:,} "
-            f"(+{st.session_state.portfolio_growth}% YTD)"
-        ),
-        title_font={"size": 12, "color": "#4b5563"},
-        paper_bgcolor="white",
-        plot_bgcolor="white",
-        margin={"l": 20, "r": 20, "t": 30, "b": 20},
-        height=180,
-        xaxis={"showgrid": False, "title": None},
-        yaxis={
-            "title": None,
-            "tickprefix": "$",
-            "ticksuffix": "k",
-            "showgrid": True,
-            "gridcolor": "#e5e7eb",
-        },
-    )
-    return fig
+# Function to query the API
+def query_financial_api(prompt: str) -> str:
+    """Send a query to the financial API and get the response."""
+    api_url = get_api_url()
+    try:
+        # Debug information
+        st.session_state.last_request_url = api_url
+        response = requests.post(
+            api_url,
+            json={"prompt": prompt},
+            headers={"Content-Type": "application/json"},
+            timeout=100,  # Reduced timeout for faster error feedback
+        )
+        # Store the response for debugging
+        st.session_state.last_response = {
+            "status_code": response.status_code,
+            "text": (
+                response.text
+                if response.status_code != SUCCESS_STATUS_CODE
+                else "Success"
+            ),
+        }
 
+        if response.status_code == SUCCESS_STATUS_CODE:
+            return response.json()["response"]
 
-def create_asset_allocation_chart() -> go.Figure:
-    """Create an asset allocation chart."""
-    labels = list(st.session_state.asset_allocation.keys())
-    values = list(st.session_state.asset_allocation.values())
-    colors = ["#1a56db", "#2563eb", "#3b82f6", "#60a5fa"]
-    fig = go.Figure(data=[go.Pie(
-        labels=labels,
-        values=values,
-        hole=0.3,
-        marker={"colors": colors},
-    )])
-    fig.update_layout(
-        title="Asset Allocation",
-        title_font={"size": 12, "color": "#4b5563"},
-        legend={
-            "orientation": "v",
-            "yanchor": "middle",
-            "y": 0.5,
-            "xanchor": "right",
-            "x": 1.1,
-            "font": {"size": 14, "color": "#374151"},
-        },
-        margin={"l": 20, "r": 120, "t": 30, "b": 20},
-        height=200,
-    )
-    fig.update_traces(textinfo="percent", textposition="inside")
-    return fig
+        # Handle non-200 status codes
+        error_message = f"API Error: {response.status_code} - {response.text}"
+        st.error(error_message)
+        exception_message = f"API Error: Status code {response.status_code}"
+        raise ValueError(exception_message)
 
+    except requests.exceptions.RequestException as e:
+        error_message = f"Connection Error: {e}"
+        st.error(error_message)
+        return """Sorry, I couldn't connect to the financial API.
+        Please check if the server is running."""
 
 # Sidebar
 with st.sidebar:
@@ -242,6 +203,16 @@ with st.sidebar:
             '<p class="sub-header">Your AI Financial Assistant</p>',
             unsafe_allow_html=True,
         )
+    st.markdown("---")
+    # API Type Selection
+    st.subheader("Backend Selection")
+    api_type = st.radio(
+        "Choose API Backend:",
+        ["FastAPI", "BentoML"],
+        index=0,
+        key="api_type_radio",
+    )
+    st.session_state.api_type = api_type
     st.markdown("---")
     nav_items = [
         ("Dashboard", True),
@@ -286,8 +257,8 @@ with col1:
     )
 with col2:
     st.markdown(
-        '<div class="tools-indicator"><span class="green-dot"></span>'
-        'Tools: stock_tools.py â � ¢ visualization.py</div>',
+        f'<div class="tools-indicator"><span class="green-dot"></span>'
+        f'Backend: {st.session_state.api_type}</div>',
         unsafe_allow_html=True,
     )
 st.markdown("</div>", unsafe_allow_html=True)
@@ -308,79 +279,43 @@ with container:
                 unsafe_allow_html=True,
             )
 
-    # Display charts based on user queries
-    if len(st.session_state.messages) == 1:
-        st.plotly_chart(create_portfolio_chart(), use_container_width=True)
-    elif (
-        len(st.session_state.messages) > 1
-        and "portfolio" in st.session_state.messages[-1]["content"].lower()
-        and st.session_state.messages[-1]["role"] == "user"
-    ):
-        st.markdown(
-            '<div class="ai-message">Here\'s your portfolio performance over '
-            'the last 6 months:</div>',
-            unsafe_allow_html=True,
-        )
-        st.plotly_chart(create_portfolio_chart(), use_container_width=True)
-        if st.session_state.messages[-1]["role"] != "assistant":
-            st.session_state.messages.append({
-                "role": "assistant",
-                "content": "Here's your portfolio performance over the last 6 months.",
-            })
-    elif (
-        len(st.session_state.messages) > 1
-        and "asset allocation" in st.session_state.messages[-1]["content"].lower()
-        and st.session_state.messages[-1]["role"] == "user"
-    ):
-        st.markdown(
-            '<div class="ai-message">Here\'s your current asset allocation:</div>',
-            unsafe_allow_html=True,
-        )
-        st.plotly_chart(create_asset_allocation_chart(), use_container_width=True)
-        if st.session_state.messages[-1]["role"] != "assistant":
-            st.session_state.messages.append({
-                "role": "assistant",
-                "content": "Here's your current asset allocation.",
-            })
-
-# Suggested prompts
+# Suggested prompts (clickable)
 st.markdown('<div class="suggestions-container">', unsafe_allow_html=True)
 col1, col2, col3 = st.columns([1, 1, 1])
+
+# Function to handle suggestion clicks
+def handle_suggestion(suggestion: str) -> None:
+    """Handle user interaction with suggested prompts.
+
+    Args:
+        suggestion (str): The suggested prompt clicked by the user.
+
+    """
+    st.session_state.messages.append({"role": "user", "content": suggestion})
+    response = query_financial_api(suggestion)
+    st.session_state.messages.append({"role": "assistant", "content": response})
+    st.rerun()
+
 with col1:
-    st.markdown('<div class="suggestion-pill">Check crypto prices</div>',
-                unsafe_allow_html=True)
+    if st.button("Check crypto prices", key="crypto_button"):
+        handle_suggestion("Check crypto prices")
+
 with col2:
-    st.markdown('<div class="suggestion-pill">Analyze my spending</div>',
-                unsafe_allow_html=True)
+    if st.button("Analyze my spending", key="spending_button"):
+        handle_suggestion("Analyze my spending")
+
 with col3:
-    st.markdown('<div class="suggestion-pill">Investment recommendations</div>',
-                unsafe_allow_html=True)
+    if st.button("Investment recommendations", key="investment_button"):
+        handle_suggestion("Investment recommendations")
+
 st.markdown("</div>", unsafe_allow_html=True)
 
-# Chat input with Streamlit's native component
-prompt = st.chat_input(
-    "Ask a financial question...",
-    accept_file=True,
-    file_type=["csv"],
-)
-if prompt and prompt.text:
+# Chat input
+prompt = st.chat_input("Ask a financial question...")
+if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
-    # Generate appropriate response
-    if "portfolio" in prompt.text.lower():
-        response = "Here's your portfolio performance over the last 6 months."
-    elif "asset" in prompt.text.lower() or "allocation" in prompt.text.lower():
-        response = "Here's your current asset allocation."
-    elif "stock" in prompt.text.lower():
-        response = "Let me fetch the latest stock information for you."
-    elif "crypto" in prompt.text.lower():
-        response = "Here are the current cryptocurrency prices."
-    elif "spend" in prompt.text.lower():
-        response = "I'll analyze your spending patterns right away."
-    elif "invest" in prompt.text.lower():
-        response = (
-            "Based on your risk profile, here are some investment recommendations."
-        )
-    else:
-        response = "I'll need to process that request. Let me get back to you soon."
+    # Query the API and get response
+    response = query_financial_api(prompt)
+    # Add response to chat
     st.session_state.messages.append({"role": "assistant", "content": response})
     st.rerun()

@@ -27,3 +27,79 @@
 - "Combine stock, crypto, and spending data to give me a comprehensive analysis."
 - "What is the best investment strategy given my current portfolio and spending habits?"
 - "How can I optimize my taxes while investing in stocks and crypto?"
+
+
+
+1. Tool: get_spending_breakdown  
+
+    "What’s my spending breakdown for 2023?"
+    "How did I spend my money last year?"
+    "Show me where my money went in 2023."
+    "Can you analyze my expenses for the year 2023?"
+    "Give me a detailed report of my spending in 2023."
+    "How much did I spend on different categories in 2023?"
+     
+
+2. Tool: get_stock_prices  
+
+    "Fetch the historical stock prices for Apple from January 1, 2023, to December 31, 2023."
+    "What were the stock prices for Tesla between 2023-05-01 and 2023-08-31?"
+    "Get me the price history of Amazon shares from the start of 2023 to the end of 2023."
+    "Can you pull up the stock data for Microsoft over the past year?"
+    "Show me the stock price trends for Google in 2023."
+     
+
+3. Tool: calculate_investment_return  
+
+    "Calculate the return on my 10,000investmentifitgrewto12,000 in 2 years."
+    "What’s the ROI if I invested 5,000anditbecame7,500 after 3 years?"
+    "How much profit would I make if I invested $20,000 and it doubled in 5 years?"
+    "What’s the annualized return on an investment that went from 1,000to1,500 in 1 year?"
+    "Compute the growth rate for an initial value of 15,000andafinalvalueof20,000 over 4 years."
+     
+
+4. Tool: get_crypto_data  
+
+    "Fetch the historical prices of Bitcoin from January 1, 2023, to December 31, 2023."
+    "What was the price of Ethereum between 2023-03-01 and 2023-06-30?"
+    "Get me the price history of Solana for the entire year of 2023."
+    "Can you show me how the price of Cardano changed in 2023?"
+    "Retrieve the cryptocurrency data for Dogecoin from the start to the end of 2023."
+     
+
+5. Tool: calculate_emergency_fund  
+
+    "What’s the recommended size of my emergency fund if my monthly expenses are $3,000?"
+    "How much should I save for emergencies if I spend $2,500 per month?"
+    "Calculate the ideal emergency fund based on my monthly expenses of $4,000."
+    "What’s the minimum amount I need in my emergency fund if I spend $5,000 monthly?"
+    "How big should my emergency savings be if my monthly expenses are $3,500?"
+     
+
+Combined Queries (Testing Tool Chaining)  
+
+These queries involve multiple tools and test the agent's ability to chain them logically: 
+
+    "If my monthly expenses are $2,000, what’s the recommended size of my emergency fund?" 
+        Tools : calculate_emergency_fund
+         
+
+    "How much did Solana grow from January 1, 2023, to December 31, 2023?" 
+        Tools : get_crypto_data, calculate_investment_return
+         
+
+    "What’s the total return if I invested 1,000inSolanaand1,000 in Tesla stocks, given that Solana grew by 50% and Tesla by 20%?" 
+        Tools : calculate_investment_return
+         
+
+    "If my spending in 2023 was $24,000, what’s the recommended size of my emergency fund?" 
+        Tools : get_spending_breakdown, calculate_emergency_fund
+         
+
+    "Compare the performance of Bitcoin and Ethereum from January 1, 2023, to December 31, 2023." 
+        Tools : get_crypto_data, calculate_investment_return
+         
+
+    "How much profit would I make if I invested 5,000inApplestocksand5,000 in Amazon stocks, assuming Apple grew by 30% and Amazon by 15%?" 
+        Tools : calculate_investment_return
+         

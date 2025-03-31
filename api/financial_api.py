@@ -44,6 +44,11 @@ class QueryResponse(BaseModel):
     details: dict[str, Any] | None = None
 
 
+def raise_http_exception(status_code: int, detail: str) -> None:
+    """Raise an HTTPException with the given status code and detail."""
+    logger.error(f"Raising HTTPException: {detail}")
+    raise HTTPException(status_code=status_code, detail=detail)
+
 @app.get("/health")
 async def health_check() -> dict[str, str]:
     """Health check endpoint to verify API is running."""
@@ -51,7 +56,7 @@ async def health_check() -> dict[str, str]:
     return {"status": "healthy", "message": "Financial Dashboard API is running"}
 
 
-@app.post("/query", response_model=QueryResponse)
+@app.post("/query")
 async def query_assistant(request: QueryRequest) -> QueryResponse:
     """Query the financial assistant with a user prompt.
 
@@ -71,14 +76,14 @@ async def query_assistant(request: QueryRequest) -> QueryResponse:
     prompt = request.prompt.strip()
     if not prompt:
         logger.error("Empty prompt received")
-        raise HTTPException(status_code=400, detail="Prompt cannot be empty")
+        raise_http_exception(400, "Prompt cannot be empty")
 
     logger.info(f"Received query: {prompt}")
     try:
         response = query_financial_agent(prompt)
         if "Error processing query" in response:
             logger.error(f"Query failed: {response}")
-            raise HTTPException(status_code=500, detail=response)
+            raise_http_exception(status_code=500, detail=response)
 
         logger.info(f"Query successful: {response}")
         return QueryResponse(
@@ -96,4 +101,4 @@ if __name__ == "__main__":
     import uvicorn
 
     # Run the FastAPI app with Uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")
+    uvicorn.run(app, host="127.0.0.1", port=8000, log_level="info")
