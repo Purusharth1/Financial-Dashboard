@@ -41,8 +41,10 @@ TOOLS = [
 
 # System prompt
 SYSTEM_PROMPT = """
-You are a financial assistant with access to specialized tools to analyze financial data and provide insights.
-Use the tools available to answer user queries accurately. If a query doesn't require a tool, respond directly.
+You are a financial assistant with access to specialized tools
+to analyze financial data and provide insights.
+Use the tools available to answer user queries accurately.
+If a query doesn't require a tool, respond directly.
 Provide concise, helpful answers based on the data or calculations from the tools.
 """
 
@@ -77,11 +79,14 @@ def query_financial_agent(prompt: str) -> str:
         response = executor.invoke({"input": prompt})
         result = response["output"]
         logger.info(f"Agent response: {result}")
-        return result
+
     except Exception as e:
         error_message = f"Error processing query: {e}"
         logger.error(error_message)
         return error_message
+
+    else:
+        return result
 
 
 if __name__ == "__main__":

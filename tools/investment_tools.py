@@ -8,6 +8,7 @@ from typing import Any
 
 import pandas as pd
 import yfinance as yf
+from langchain_core.tools import tool
 from loguru import logger
 
 # Add project root to sys.path for module imports
@@ -51,6 +52,7 @@ def validate_data(
         raise ValueError(error_message)
 
 # 3. Investment Calculator
+@tool
 def calculate_investment_return(input_data: InvestmentReturnInput) -> dict[str, Any]:
     """Calculate investment returns for a given stock.
 

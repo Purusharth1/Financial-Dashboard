@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 import requests
+from langchain_core.tools import tool
 from loguru import logger
 
 # Add project root to sys.path for module imports
@@ -61,7 +62,7 @@ def get_historical_price(crypto_id: str, date: str, vs_currency: str = "usd") ->
         logger.error(error_message)
         raise ValueError(error_message) from e
 
-
+@tool
 def get_crypto_data(input_data: CryptoInput) -> dict[str, Any]:
     """Retrieve current cryptocurrency data and calculate price increase b/w two dates.
 
