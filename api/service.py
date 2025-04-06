@@ -4,15 +4,15 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from loguru import logger
-
 import bentoml
+import requests
+from loguru import logger
 
 # Update sys.path using pathlib
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from llm.query_llm import query_financial_agent  # Import from existing agent
-from utils.logging_setup import setup_logging   # Import from existing setup
+from utils.logging_setup import setup_logging  # Import from existing setup
 
 # Set up unified logging
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -43,6 +43,7 @@ class FinancialAssistant:
 
         Returns:
             A dictionary with the response, status, and optional details.
+
         """
         prompt = prompt.strip()
         if not prompt:
@@ -50,18 +51,22 @@ class FinancialAssistant:
             return {"status": "error", "response": "Prompt cannot be empty"}
 
         logger.info(f"Received query: {prompt}")
+        result = None
         try:
             response = query_financial_agent(prompt)
             if "Error processing query" in response:
                 logger.error(f"Query failed: {response}")
-                return {"status": "error", "response": response}
-            
-            logger.info(f"Query successful: {response}")
-            return {"response": response, "status": "success", "details": None}
-        except Exception as e:
-            error_message = f"Failed to process query: {str(e)}"
+                result = {"status": "error", "response": response}
+            else:
+                logger.info(f"Query successful: {response}")
+                result = {"response": response, "status": "success", "details": None}
+        # Catch specific exceptions that you expect might occur
+        except (requests.RequestException, ValueError, KeyError) as e:
+            error_message = f"Failed to process query: {e!s}"
             logger.error(error_message)
-            return {"status": "error", "response": error_message}
+            result = {"status": "error", "response": error_message}
+
+        return result
 
 if __name__ == "__main__":
     # Example usage

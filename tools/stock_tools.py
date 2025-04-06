@@ -5,7 +5,6 @@ from typing import Any
 
 import pandas as pd
 import yfinance as yf
-from langchain_core.tools import tool
 from loguru import logger
 
 # Add project root to sys.path for module imports
@@ -54,7 +53,7 @@ def validate_data(
         logger.error(error_message)
         raise ValueError(error_message)
 
-@tool
+
 def get_stock_prices(input_data: StockPriceInput) -> dict[str, Any]:
     """Retrieve current and historical stock prices.
 

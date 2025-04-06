@@ -6,9 +6,11 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "bentoml>=1.4.7",
+    "faker>=37.1.0",
     "fastapi[standard]>=0.115.12",
     "langchain>=0.3.21",
     "langchain-ollama>=0.3.0",
+    "locust>=2.33.2",
     "loguru>=0.7.3",
     "matplotlib>=3.10.1",
     "ollama>=0.4.7",

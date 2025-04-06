@@ -2,7 +2,6 @@
 import sys
 from pathlib import Path
 
-from langchain_core.tools import tool
 from loguru import logger
 
 # Add project root to sys.path for module imports
@@ -18,7 +17,7 @@ DEFAULT_CONFIG_PATH = PROJECT_ROOT / "utils" / "configs.toml"
 logging_configs = setup_logging(str(DEFAULT_CONFIG_PATH))
 logger.info("Logging initialized for emergency_fund_calculator")
 
-@tool
+
 def calculate_emergency_fund(input_data: EmergencyFundInput) -> dict:
     """Calculate the ideal emergency fund size and track progress.
 
