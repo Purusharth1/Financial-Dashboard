@@ -26,7 +26,7 @@ logger.info("Logging initialized for Investment_tools.py")
 def calculate_investment_return_simple(
     input_data: InvestmentReturnInput,
 ) -> dict[str, Any]:
-    """Calculate investment returns based on initial amount, time period, and annual return rate.
+    """Calculate investment returns and annual return rate.
 
     Args:
     ----
@@ -34,11 +34,13 @@ def calculate_investment_return_simple(
 
     Returns:
     -------
-        Dict[str, Any]: Investment details including final value, profit/loss, and returns.
+        Dict[str, Any]: Investment details including final
+        value, profit/loss, and returns.
 
     Raises:
     ------
-        ValueError: If inputs are invalid (negative values or unreasonable annual return).
+        ValueError: If inputs are invalid
+        (negative values or unreasonable annual return).
 
     """
     logger.info(
@@ -87,18 +89,3 @@ def calculate_investment_return_simple(
         raise ValueError(error_message) from e
 
 
-# Example usage:
-if __name__ == "__main__":
-    try:
-        # Create an instance of the Pydantic model for validation
-        input_data = InvestmentReturnInput(
-            initial_amount=10000,
-            years=5,
-            annual_return=7,
-        )
-
-        # Pass the validated input data to the function
-        result = calculate_investment_return_simple(input_data)
-        print(result)
-    except ValueError as e:
-        print(f"Error: {e}")

@@ -63,7 +63,8 @@ TOOLS: list[StructuredTool] = [
             InvestmentReturnInput(**kwargs),
         ),
         description=(
-            "Calculate investment returns based on initial amount, time period, and annual return rate."
+            """Calculate investment returns based on initial amount,
+            time period, and annual return rate."""
             "Expects {'initial_amount': float, 'years': float, 'annual_return': float}."
         ),
         args_schema=InvestmentReturnInput,

@@ -72,7 +72,7 @@ def lookup_crypto_symbol(crypto_name: str) -> str | None:
 
 
 def get_historical_price(
-    crypto_id: str, date: str = "2025-04-01", vs_currency: str = "usd"
+    crypto_id: str, date: str = "2025-04-01", vs_currency: str = "usd",
 ) -> float:
     """Retrieve historical cryptocurrency price for a specific date using CryptoCompare.
 

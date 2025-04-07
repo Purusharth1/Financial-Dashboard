@@ -64,14 +64,15 @@ class StockPriceInput(BaseModel):
 
 
 class InvestmentReturnInput(BaseModel):
-    """Pydantic model for validating inputs to the simple investment return calculator."""
+    """Pydantic model for validating inputs to investment return calculator."""
 
+    MIN_ANNUAL_RETURN = -100
     initial_amount: float = Field(
-        ..., gt=0, description="Initial investment amount in dollars."
+        ..., gt=0, description="Initial investment amount in dollars.",
     )
     years: float = Field(..., gt=0, description="Number of years for the investment.")
     annual_return: float = Field(
-        ..., description="Annual return rate as a percentage (e.g., 5 for 5%)."
+        ..., description="Annual return rate as a percentage (e.g., 5 for 5%).",
     )
 
     @field_validator("initial_amount")
@@ -96,7 +97,7 @@ class InvestmentReturnInput(BaseModel):
     @classmethod
     def validate_reasonable_annual_return(cls, value: float) -> float:
         """Ensure that the annual return is reasonable (not less than -100%)."""
-        if value < -100:
+        if value < cls.MIN_ANNUAL_RETURN:
             error_message = "Annual return cannot be less than -100%."
             raise ValueError(error_message)
         return value
