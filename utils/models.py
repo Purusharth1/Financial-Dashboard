@@ -1,4 +1,5 @@
 """Pydantic models for data validation."""
+
 from datetime import UTC, datetime
 from typing import Any
 
@@ -8,16 +9,30 @@ from pydantic import BaseModel, Field, field_validator
 class EmergencyFundInput(BaseModel):
     """Pydantic model for validating inputs to the emergency fund calculator."""
 
-    monthly_expenses: float = Field(..., gt=0, description="""Total monthly
-                                    expenses in dollars.""")
+    monthly_expenses: float = Field(
+        ...,
+        gt=0,
+        description="""Total monthly
+                                    expenses in dollars.""",
+    )
     financial_obligations: float = Field(
-        0.0, ge=0, description="""Additional monthly
+        0.0,
+        ge=0,
+        description="""Additional monthly
         financial obligations (e.g., debt payments).""",
     )
-    months_coverage: int = Field(6, ge=1, description="""Desired coverage
-                                 period in months.""")
-    current_savings: float = Field(0.0, ge=0, description="""Amount already
-                                   saved for emergencies.""")
+    months_coverage: int = Field(
+        6,
+        ge=1,
+        description="""Desired coverage
+                                 period in months.""",
+    )
+    current_savings: float = Field(
+        0.0,
+        ge=0,
+        description="""Amount already
+                                   saved for emergencies.""",
+    )
 
     @field_validator("monthly_expenses", "financial_obligations", "current_savings")
     @classmethod
@@ -32,26 +47,32 @@ class EmergencyFundInput(BaseModel):
 class StockPriceInput(BaseModel):
     """Pydantic model for validating inputs to the stock price checker."""
 
-    symbol: str = Field(..., min_length=1, description="""Stock ticker
-                        symbol (e.g., 'AAPL').""")
+    symbol: str = Field(
+        ...,
+        min_length=1,
+        description="""Stock ticker
+                        symbol (e.g., 'AAPL').""",
+    )
     start_date: str | None = Field(
-        None, description="Start date for historical data (format: 'YYYY-MM-DD').",
+        None,
+        description="Start date for historical data (format: 'YYYY-MM-DD').",
     )
     end_date: str | None = Field(
-        None, description="End date for historical data (format: 'YYYY-MM-DD').",
+        None,
+        description="End date for historical data (format: 'YYYY-MM-DD').",
     )
 
 
 class InvestmentReturnInput(BaseModel):
-    """Pydantic model for validating inputs to the investment return calculator."""
+    """Pydantic model for validating inputs to the simple investment return calculator."""
 
-    symbol: str = Field(..., min_length=1, description="""Stock ticker symbol
-                        (e.g., 'AAPL').""")
-    initial_amount: float = Field(..., gt=0, description="Initial investment amount.")
-    start_date: str = Field(..., description="""Start date of investment
-                            (format: 'YYYY-MM-DD').""")
-    end_date: str = Field(..., description="""End date of investment
-                          (format: 'YYYY-MM-DD').""")
+    initial_amount: float = Field(
+        ..., gt=0, description="Initial investment amount in dollars."
+    )
+    years: float = Field(..., gt=0, description="Number of years for the investment.")
+    annual_return: float = Field(
+        ..., description="Annual return rate as a percentage (e.g., 5 for 5%)."
+    )
 
     @field_validator("initial_amount")
     @classmethod
@@ -62,22 +83,47 @@ class InvestmentReturnInput(BaseModel):
             raise ValueError(error_message)
         return value
 
+    @field_validator("years")
+    @classmethod
+    def validate_positive_years(cls, value: float) -> float:
+        """Ensure that the number of years is positive."""
+        if value <= 0:
+            error_message = "Years must be positive."
+            raise ValueError(error_message)
+        return value
+
+    @field_validator("annual_return")
+    @classmethod
+    def validate_reasonable_annual_return(cls, value: float) -> float:
+        """Ensure that the annual return is reasonable (not less than -100%)."""
+        if value < -100:
+            error_message = "Annual return cannot be less than -100%."
+            raise ValueError(error_message)
+        return value
 
 
 class CryptoInput(BaseModel):
     """Pydantic model for validating inputs to the cryptocurrency tracker."""
 
-    crypto_id: str = Field(..., min_length=1, description="""Cryptocurrency
-                           ID (e.g., 'bitcoin').""")
+    crypto_id: str = Field(
+        ...,
+        min_length=1,
+        description="""Cryptocurrency
+                           ID (e.g., 'bitcoin').""",
+    )
     vs_currency: str = Field(
-        default="usd", min_length=1, description="""Currency to compare
+        default="usd",
+        min_length=1,
+        description="""Currency to compare
                                                     against (e.g., 'usd').""",
     )
     start_date: str | None = Field(
-        None, description="Start date for historical data (format: 'YYYY-MM-DD').",
+        None,
+        description="Start date for historical data (format: 'YYYY-MM-DD').",
     )
     end_date: str | None = Field(
-        None, description="End date for historical data (format: 'YYYY-MM-DD').",
+        None,
+        description="End date for historical data (format: 'YYYY-MM-DD').",
     )
 
     @field_validator("start_date", "end_date")
@@ -92,6 +138,7 @@ class CryptoInput(BaseModel):
                                     Expected format: YYYY-MM-DD."""
                 raise ValueError(error_message) from e
         return value
+
 
 class SpendingBreakdownInput(BaseModel):
     """Pydantic model for validating inputs to the spending breakdown tool."""
@@ -119,13 +166,16 @@ class SpendingBreakdownInput(BaseModel):
         """Ensure that at least one of `data_source` or `spending_data` is provided.
 
         Args:
+        ----
             value: Current field being validated.
             values: Dictionary of all previously validated fields.
 
         Raises:
+        ------
             ValueError: If neither `data_source` nor `spending_data` is provided.
 
         Returns:
+        -------
             The validated value.
 
         """
