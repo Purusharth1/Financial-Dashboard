@@ -1,4 +1,5 @@
 """Cryptocurrency Tracker Tool."""
+
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
@@ -21,13 +22,17 @@ logging_configs = setup_logging(str(DEFAULT_CONFIG_PATH))
 logger.info("Logging initialized for crypto_tools.py")
 
 MAX_CRYPTO_SYMBOL_LENGTH = 5
+
+
 def lookup_crypto_symbol(crypto_name: str) -> str | None:
     """Look up cryptocurrency symbol from a name using CoinGecko API.
 
     Args:
+    ----
         crypto_name: The name or partial name of the cryptocurrency
 
     Returns:
+    -------
         Optional[str]: The cryptocurrency symbol if found, None otherwise
 
     """
@@ -66,18 +71,23 @@ def lookup_crypto_symbol(crypto_name: str) -> str | None:
     return result
 
 
-def get_historical_price(crypto_id: str, date: str, vs_currency: str = "usd") -> float:
+def get_historical_price(
+    crypto_id: str, date: str = "2025-04-01", vs_currency: str = "usd"
+) -> float:
     """Retrieve historical cryptocurrency price for a specific date using CryptoCompare.
 
     Args:
+    ----
         crypto_id: Cryptocurrency ID (e.g., 'BTC').
         date: Date in 'YYYY-MM-DD' format.
         vs_currency: Currency to compare against (e.g., 'usd', default: 'usd').
 
     Returns:
+    -------
         float: Historical price of the cryptocurrency on the given date.
 
     Raises:
+    ------
         ValueError: If no historical data is found for the given date.
 
     """
@@ -115,13 +125,16 @@ def get_crypto_data(input_data: CryptoInput) -> dict[str, Any]:
     """Retrieve current cryptocurrency data and calculate price increase b/w two dates.
 
     Args:
+    ----
         input_data: Validated input data using Pydantic.
 
     Returns:
+    -------
         Dict[str, Any]: Current price, 24-hour price change,
            and price increase between dates (if provided).
 
     Raises:
+    ------
         ValueError: If inputs are invalid or no data is available.
 
     """
@@ -163,15 +176,21 @@ def get_crypto_data(input_data: CryptoInput) -> dict[str, Any]:
         # Calculate price increase between two dates if provided
         if input_data.start_date and input_data.end_date:
             start_price = get_historical_price(
-                crypto_symbol, input_data.start_date, input_data.vs_currency,
+                crypto_symbol,
+                input_data.start_date,
+                input_data.vs_currency,
             )
             end_price = get_historical_price(
-                crypto_symbol, input_data.end_date, input_data.vs_currency,
+                crypto_symbol,
+                input_data.end_date,
+                input_data.vs_currency,
             )
 
             # Calculate percentage increase
             price_increase_percentage = (
-                ((end_price-start_price) / start_price) * 100 if start_price > 0 else 0
+                ((end_price - start_price) / start_price) * 100
+                if start_price > 0
+                else 0
             )
 
             # Add historical data to result
