@@ -2,12 +2,11 @@
 
 This module provides tools for calculating investment returns and validating stock data.
 """
+
 import sys
 from pathlib import Path
 from typing import Any
 
-import pandas as pd
-import yfinance as yf
 from loguru import logger
 
 # Add project root to sys.path for module imports
@@ -24,87 +23,82 @@ logging_configs = setup_logging(str(DEFAULT_CONFIG_PATH))
 logger.info("Logging initialized for Investment_tools.py")
 
 
-def validate_data(
-    data: pd.DataFrame,
-    symbol: str,
-    start_date: str,
-    end_date: str,
-) -> None:
-    """Validate if the data is not empty and raise an error if it is.
+def calculate_investment_return_simple(
+    input_data: InvestmentReturnInput,
+) -> dict[str, Any]:
+    """Calculate investment returns based on initial amount, time period, and annual return rate.
 
     Args:
-        data: Data to validate (e.g., stock history).
-        symbol: Stock ticker symbol.
-        start_date: Start date for historical data.
-        end_date: End date for historical data.
-
-    Raises:
-        ValueError: If the data is empty.
-
-    """
-    if data.empty:
-        error_message = (
-            f"No historical data for {symbol} between "
-            f"{start_date} and {end_date}"
-        )
-        logger.error(error_message)
-        raise ValueError(error_message)
-
-# 3. Investment Calculator
-def calculate_investment_return(input_data: InvestmentReturnInput) -> dict[str, Any]:
-    """Calculate investment returns for a given stock.
-
-    Args:
-        input_data (InvestmentReturnInput): Validated input data using Pydantic.
+    ----
+        input_data (InvestmentReturnInput): Validated input data using Pydantic model.
 
     Returns:
-        Dict[str, Any]: Investment details including profit/loss and percentage return.
+    -------
+        Dict[str, Any]: Investment details including final value, profit/loss, and returns.
+
+    Raises:
+    ------
+        ValueError: If inputs are invalid (negative values or unreasonable annual return).
 
     """
     logger.info(
-        f"Calculating investment return for {input_data.symbol} "
-        f"from {input_data.start_date} to {input_data.end_date}",
+        f"Calculating simple investment return with "
+        f"initial_amount={input_data.initial_amount}, years={input_data.years}, "
+        f"annual_return={input_data.annual_return}%",
     )
 
     try:
-        # Fetch stock data
-        stock = yf.Ticker(input_data.symbol)
-        hist = stock.history(start=input_data.start_date, end=input_data.end_date)
+        # Unpack validated inputs
+        initial_amount = input_data.initial_amount
+        years = input_data.years
+        annual_return = input_data.annual_return
 
-        # Validate historical data
-        validate_data(hist,input_data.symbol,input_data.start_date,input_data.end_date)
+        # Convert annual return percentage to decimal
+        return_rate = annual_return / 100
 
-        # Calculate investment metrics
-        start_price = hist["Close"].iloc[0]
-        end_price = hist["Close"].iloc[-1]
-        shares = input_data.initial_amount / start_price
-        final_value = shares * end_price
-        profit_loss = final_value - input_data.initial_amount
-        percentage_return = (profit_loss / input_data.initial_amount) * 100
+        # Calculate final value using compound interest formula: A = P(1 + r)^t
+        final_value = initial_amount * (1 + return_rate) ** years
+        profit_loss = final_value - initial_amount
+        total_percentage_return = (
+            (profit_loss / initial_amount) * 100 if initial_amount > 0 else 0
+        )
 
         logger.info(
-            f"Investment return calculated: profit/loss={profit_loss:.2f}, "
-            f"return%={percentage_return:.2f}",
+            f"Investment return calculated: final_value={final_value:.2f}, "
+            f"profit/loss={profit_loss:.2f}, "
+            f"return%={total_percentage_return:.2f}",
         )
 
         return {
-            "symbol": input_data.symbol,
-            "initial_amount": input_data.initial_amount,
-            "start_date": input_data.start_date,
-            "end_date": input_data.end_date,
-            "start_price": float(start_price),
-            "end_price": float(end_price),
-            "shares": shares,
-            "final_value": final_value,
-            "profit_loss": profit_loss,
-            "percentage_return": percentage_return,
+            "initial_amount": round(initial_amount, 2),
+            "years": years,
+            "annual_return": annual_return,
+            "final_value": round(final_value, 2),
+            "profit_loss": round(profit_loss, 2),
+            "total_percentage_return": round(total_percentage_return, 2),
         }
 
     except ValueError as e:
         logger.error(str(e))
         raise
     except Exception as e:
-        error_message = f"""Error calculating investment return
-                   for {input_data.symbol}: {e}"""
+        error_message = f"Error calculating investment return: {e}"
         logger.error(error_message)
         raise ValueError(error_message) from e
+
+
+# Example usage:
+if __name__ == "__main__":
+    try:
+        # Create an instance of the Pydantic model for validation
+        input_data = InvestmentReturnInput(
+            initial_amount=10000,
+            years=5,
+            annual_return=7,
+        )
+
+        # Pass the validated input data to the function
+        result = calculate_investment_return_simple(input_data)
+        print(result)
+    except ValueError as e:
+        print(f"Error: {e}")
