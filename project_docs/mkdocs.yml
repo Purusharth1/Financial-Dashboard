@@ -1,0 +1,62 @@
+site_name: Financial Dashboard Documentation
+site_description: Documentation for the Financial Dashboard project, a powerful tool for financial analysis and real-time market data.
+site_author: Your Name
+site_url: https://your-repo.github.io/financial-dashboard/
+repo_url: https://github.com/your-repo/financial-dashboard
+repo_name: financial-dashboard
+
+theme:
+  name: material
+  palette:
+    primary: blue
+    accent: green
+  features:
+    - content.code.copy
+    - content.tabs
+
+nav:
+  - Home: index.md
+  - Project Architecture: architecture.md
+  - Features: features.md
+  - Installation Guide: installation.md
+  - Usage Guide: usage.md
+  - API Documentation: api.md
+  - Experience and Learnings: experience.md
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - pymdownx.tasklist
+  - pymdownx.details
+  - pymdownx.emoji
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.magiclink
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.tilde
+  - attr_list
+  - md_in_html
+  - admonition
+  - codehilite
+  - footnotes
+  - toc:
+      permalink: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+plugins:
+  - search
+  - mkdocstrings
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/your-repo/financial-dashboard
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/your-handle
