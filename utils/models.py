@@ -1,7 +1,7 @@
 """Pydantic models for data validation."""
 
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, ClassVar
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -66,7 +66,7 @@ class StockPriceInput(BaseModel):
 class InvestmentReturnInput(BaseModel):
     """Pydantic model for validating inputs to investment return calculator."""
 
-    MIN_ANNUAL_RETURN = -100
+    MIN_ANNUAL_RETURN: ClassVar[int] = -100
     initial_amount: float = Field(
         ..., gt=0, description="Initial investment amount in dollars.",
     )

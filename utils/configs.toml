@@ -1,7 +1,7 @@
 # LLM Configuration
 [llm]
-model_name = "qwen2.5:7b"
-default_model = "qwen2.5:7b"
+model_name = "llama3.2:3b"
+default_model = "llama3.2:3b"
 ollama_server_url = "http://localhost:11434"  # Default Ollama server URL
 system_prompt = """
 You are a highly capable financial assistant. Your capabilities include:
