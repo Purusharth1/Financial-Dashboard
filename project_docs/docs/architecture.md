@@ -10,12 +10,12 @@ graph TD;
     B -->|Tool Selection| C[Financial Tools];
     C -->|Crypto API| D[CoinGecko];
     C -->|Stock API| E[yfinance];
-    C -->|Spending Data| F[Spending Breakdown];
+    C -->|Loan Calc| F[Loan EMI Calculator];
     C -->|Investment Calc| G[Investment Return];
     C -->|Emergency Fund| H[Emergency Fund Calc];
     D -->|Price Data| I[Response Formatter];
     E -->|Price Data| I;
-    F -->|Analysis| I;
+    F -->|EMI Details| I;
     G -->|Returns| I;
     H -->|Fund Size| I;
     I -->|Output| J[User Response];
@@ -28,7 +28,7 @@ graph TD;
 - **Financial Tools**:
   - **CoinGecko API**: Fetches crypto prices (current and historical).
   - **yfinance**: Fetches stock prices (current and historical).
-  - **Spending Breakdown**: Analyzes yearly spending data.
+  - **Loan EMI Calculator**: Calculates loan EMIs based on principal, interest rate, and tenure.
   - **Investment Return**: Calculates investment returns.
   - **Emergency Fund Calc**: Estimates emergency fund size.
 - **Response Formatter**: Formats outputs with timestamps.

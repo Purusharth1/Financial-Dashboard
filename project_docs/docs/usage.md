@@ -18,8 +18,10 @@ This guide explains how to use the **Financial Dashboard** with natural language
 - "If I invested $1000 in Bitcoin on 2023-01-01, what would it be worth now?"
 - "Calculate returns on $500 invested in AAPL in 2022."
 
-### Spending Analysis
-- "Show me my spending breakdown for 2023."
+### Loan EMI Calculations
+- "Calculate EMI for a $200,000 home loan at 5.5% interest for 30 years."
+- "What would be my monthly payment for a $50,000 car loan at 4.2% for 5 years?"
+- "Compare EMIs for a $100,000 loan at 6% for 15 years vs 20 years."
 
 ### Emergency Fund
 - "What's the recommended emergency fund size for $2000 monthly expenses?"

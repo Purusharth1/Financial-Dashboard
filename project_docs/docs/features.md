@@ -14,8 +14,10 @@ The **Financial Dashboard** project offers the following features:
 - Compute returns on specific investments (e.g., "$1000 in Bitcoin from 2023-01-01").
 - Supports both crypto and stocks.
 
-## 4. Spending Breakdown
-- Analyze yearly expenses (e.g., spending in 2023).
+
+## 4. Loan EMI Calculator
+- Calculate equated monthly installments (EMI) for loans.
+- Supports various loan types with different interest rates and tenures.
 
 ## 5. Emergency Fund Estimator
 - Calculate recommended emergency fund size based on monthly expenses.
