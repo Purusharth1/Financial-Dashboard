@@ -14,7 +14,7 @@ from loguru import logger
 sys.path.append(str(Path(__file__).parent.parent))
 from tools.crypto_tools import get_crypto_data
 from tools.emergency_fund_tools import calculate_emergency_fund
-from tools.investment_tools import calculate_investment_return
+from tools.investment_tools import calculate_investment_return_simple
 from tools.spending_tools import get_spending_breakdown
 from tools.stock_tools import get_stock_prices
 from utils.configs import load_config
@@ -58,13 +58,13 @@ TOOLS: list[StructuredTool] = [
         args_schema=StockPriceInput,
     ),
     StructuredTool.from_function(
-        name="calculate_investment_return",
-        func=lambda **kwargs: calculate_investment_return(
+        name="calculate_investment_return_simple",
+        func=lambda **kwargs: calculate_investment_return_simple(
             InvestmentReturnInput(**kwargs),
         ),
         description=(
-            "Calculate return. Expects {'symbol': str, 'initial_amount': float, "
-            "'start_date': 'YYYY-MM-DD', 'end_date': 'YYYY-MM-DD'}."
+            "Calculate investment returns based on initial amount, time period, and annual return rate."
+            "Expects {'initial_amount': float, 'years': float, 'annual_return': float}."
         ),
         args_schema=InvestmentReturnInput,
     ),
@@ -85,25 +85,31 @@ TOOLS: list[StructuredTool] = [
     ),
 ]
 
+
 def initialize_llm() -> AgentExecutor:
     """Initialize the LangChain agent."""
     llm = ChatOllama(model=MODEL_NAME, temperature=0)
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", SYSTEM_PROMPT),
-        ("human", "{input}"),
-        ("placeholder", "{agent_scratchpad}"),
-    ])
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            ("system", SYSTEM_PROMPT),
+            ("human", "{input}"),
+            ("placeholder", "{agent_scratchpad}"),
+        ],
+    )
     agent = create_tool_calling_agent(llm, TOOLS, prompt)
     executor = AgentExecutor(agent=agent, tools=TOOLS, verbose=True, max_iterations=4)
     logger.info("Financial agent initialized")
     return executor
 
+
 agent_executor = initialize_llm()
+
 
 def handle_invalid_response() -> NoReturn:
     """Raise an error for unexpected response formats."""
     error_message = "Unexpected response format"
     raise ValueError(error_message)
+
 
 def query_financial_agent(prompt: str) -> str:
     """Query the financial agent."""
@@ -125,43 +131,50 @@ def query_financial_agent(prompt: str) -> str:
                 return f"Failed to process query after {max_retries} attempts: {e}"
     return "Unexpected error in retry loop"
 
+
 if __name__ == "__main__":
     queries = [
-        # Crypto queries
-        "How much did Solana price increase from 2023-01-01 to 2023-12-31?",
-        "What’s the price growth of Solana between January 1, 2023, and December 31, 2023?",
-        "Can you tell me how much Solana went up from the start to the end of 2023?",
-        "If I had Solana on Jan 1, 2023, how much more is it worth by Dec 31, 2023?",
+        "I've been saving $300 monthly since I was 25. Now I'm 35 with $50,000 saved. If I continue until retirement at 65, how much will I have assuming modest 6% returns?",
+        "My parents gifted me $15,000 for my college graduation. If I don't touch it until I'm 60 (I'm 22 now), what might it be worth with average market returns?",
+        "I'm debating between investing a lump sum of $20,000 now versus $400 monthly for 5 years. Which approach would yield better returns assuming 7% growth?",
+        "For my retirement planning, I need to know if saving $500 monthly will get me to $1 million by age 65. I'm currently 30 with $30,000 already invested.",
+        "How would my investment growth change if I increased my annual contribution by 3% each year, starting with $10,000 and $500 monthly for 20 years at 7%?",
+    ]
+    # Crypto queries
+    # "How much did Solana price increase from 2023-01-01 to 2023-12-31?",
+    # "What’s the price growth of Solana between January 1, 2023, and December 31, 2023?",
+    # "Can you tell me how much Solana went up from the start to the end of 2023?",
+    # "If I had Solana on Jan 1, 2023, how much more is it worth by Dec 31, 2023?",
 
-        # Emergency fund queries
-        # "If my monthly expenses are $3,000, how large should my emergency fund be?",
-        # "What’s the suggested emergency savings amount for someone spending $2,500 monthly?",
-        # "Based on $4,000 monthly expenses, what’s the recommended emergency fund size?",
-        # "How much do I need to save for emergencies if I spend $5,000 per month?",
-        # "What’s the target emergency fund amount for $3,500 in monthly expenses?",
+    # Emergency fund queries
+    # "If my monthly expenses are $3,000, how large should my emergency fund be?",
+    # "What’s the suggested emergency savings amount for someone spending $2,500 monthly?",
+    # "Based on $4,000 monthly expenses, what’s the recommended emergency fund size?",
+    # "How much do I need to save for emergencies if I spend $5,000 per month?",
+    # "What’s the target emergency fund amount for $3,500 in monthly expenses?",
 
-        # Stock queries
-        # "Fetch the historical stock prices for Apple from January 1, 2023, to December 31, 2023.",
-        # "What were the price trends for Tesla between May 1, 2023, and August 31, 2023?",
-        # "Retrieve the stock price history of Amazon shares for the entire year of 2023.",
-        # "Can you pull up the stock data for Microsoft from the start of 2023 to the end of 2023?",
-        # "Show me how Google's stock prices changed throughout 2023.",
+    # Stock queries
+    # "Fetch the historical stock prices for Apple from January 1, 2023, to December 31, 2023.",
+    # "What were the price trends for Tesla between May 1, 2023, and August 31, 2023?",
+    # "Retrieve the stock price history of Amazon shares for the entire year of 2023.",
+    # "Can you pull up the stock data for Microsoft from the start of 2023 to the end of 2023?",
+    # "Show me how Google's stock prices changed throughout 2023.",
 
-        # Investment queries
-        # "Calculate the return on my 10,000 investment if it grew to 12,000 in 2 years.",
-        # "What’s the ROI if I invested 5,000 and it became 7,500 after 3 years?",
-        # "How much profit would I make if I invested $20,000 and it doubled in 5 years?",
-        # "What’s the annualized return on an investment that went from 1,000to1,500 in 1 year?",
-        # "Compute the growth rate for an initial value of 15,000 and a finalvalueof 20,000 over 4 years.",
+    # Investment queries
+    # "Calculate the return on my 10,000 investment if it grew to 12,000 in 2 years.",
+    # "What’s the ROI if I invested 5,000 and it became 7,500 after 3 years?",
+    # "How much profit would I make if I invested $20,000 and it doubled in 5 years?",
+    # "What’s the annualized return on an investment that went from 1,000to1,500 in 1 year?",
+    # "Compute the growth rate for an initial value of 15,000 and a finalvalueof 20,000 over 4 years.",
 
-        # Spending queries
-        # "What’s my spending breakdown for 2023?",
-        # "How did I allocate my money in 2023?",
-        # "Can you show me a detailed report of my expenses for 2023?",
-        # "Break down my spending categories for the year 2023.",
-        # "How much did I spend on different categories last year?",
-        # "Provide an analysis of my spending habits in 2023.",
-        ]
+    # Spending queries
+    # "What’s my spending breakdown for 2023?",
+    # "How did I allocate my money in 2023?",
+    # "Can you show me a detailed report of my expenses for 2023?",
+    # "Break down my spending categories for the year 2023.",
+    # "How much did I spend on different categories last year?",
+    # "Provide an analysis of my spending habits in 2023.",
+
     for q in queries:
         response = query_financial_agent(q)
         print(f"Query: {q}\nResponse: {response}\n")
